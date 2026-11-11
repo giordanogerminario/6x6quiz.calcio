@@ -87,6 +87,7 @@ small{color:var(--muted)}
     <div class="row"><div><label>Accento</label><input type="color" id="sAcc"></div><div><label>Facile</label><input type="color" id="sF"></div>
       <div><label>Media</label><input type="color" id="sM"></div><div><label>Difficile</label><input type="color" id="sD"></div></div>
     <label><input type="checkbox" id="sCov" style="width:auto"> Reticolo colorato in copertina</label>
+    <label><input type="checkbox" id="sSafe" style="width:auto"> Mostra in anteprima le zone coperte da TikTok</label>
     <label>Dimensione massima del testo delle domande</label><input type="number" id="sQ" min="56" max="110" step="4">
     <div class="actions"><button class="ghost" onclick="document.getElementById('lf').click()">Cambia logo (PNG)</button>
       <input type="file" id="lf" accept="image/png" hidden><button class="ghost" id="reset">Ripristina</button></div>
@@ -155,54 +156,55 @@ function footer(ctx,lit,showGrid,hint){if(showGrid)grid(ctx,74,1610,34,9,lit,row
 
 /* ---------- slide ---------- */
 function slideQuestion(ctx,n,item,showAns,final){
-  background(ctx,S.acc);logo(ctx,62,56,96);
-  txt(ctx,`DOMANDA ${n}/6`,74,200,F(800,54),"#fff");pill(ctx,74,272,item.label,item.color);
-  timer(ctx,900,250,showAns);
-  let size=S.qmax,lines;for(;size>=52;size-=4){lines=wrap(ctx,item.q,F(800,size),930);if(lines.length*size*1.12<=380)break}
-  let y=385+(400-lines.length*size*1.12)/2;for(const l of lines){txt(ctx,l,74,y,F(800,size),"#fff");y+=size*1.12}
+  /* zona sicura TikTok: y 300-1540, x 74-900 */
+  background(ctx,S.acc);
+  txt(ctx,`DOMANDA ${n}/6`,74,318,F(800,54),"#fff");pill(ctx,74,388,item.label,item.color);
+  grid(ctx,470,322,24,6,n,rowColors());
+  timer(ctx,800,410,showAns);
+  let size=S.qmax,lines;for(;size>=52;size-=4){lines=wrap(ctx,item.q,F(800,size),826);if(lines.length*size*1.12<=320)break}
+  let y=530+(330-lines.length*size*1.12)/2;for(const l of lines){txt(ctx,l,74,y,F(800,size),"#fff");y+=size*1.12}
   const L="ABCD";
-  for(let i=0;i<4;i++){const top=820+i*182,isC=showAns&&item.ans===L[i],dim=showAns&&!isC;
-    rr(ctx,74,top,932,150,22);
+  for(let i=0;i<4;i++){const top=880+i*158,isC=showAns&&item.ans===L[i],dim=showAns&&!isC;
+    rr(ctx,74,top,826,136,20);
     if(isC){ctx.fillStyle=S.acc;ctx.fill()}else{ctx.fillStyle=dim?"rgba(14,14,14,.94)":"rgba(16,16,16,.94)";ctx.fill();ctx.strokeStyle=dim?"#373737":S.acc;ctx.lineWidth=4;ctx.stroke()}
-    rr(ctx,96,top+22,106,106,16);ctx.fillStyle=isC?"#000":(dim?"#323232":S.acc);ctx.fill();
-    txt(ctx,L[i]+".",149,top+34,F(800,66),isC?S.acc:(dim?"#787878":"#000"),"center");
-    let os=62,o=typo(item.opts[i]);while(tw(ctx,o,F(700,os))>680&&os>34)os-=2;
-    txt(ctx,o,234,top+75-os*.55,F(700,os),isC?"#000":(dim?"#5f5f5f":"#fff"));
-    if(isC)check(ctx,922,top+47,56,"#000");}
-  footer(ctx,n,true,final?"Commenta":"Scorri");
+    rr(ctx,94,top+19,98,98,14);ctx.fillStyle=isC?"#000":(dim?"#323232":S.acc);ctx.fill();
+    txt(ctx,L[i]+".",143,top+30,F(800,62),isC?S.acc:(dim?"#787878":"#000"),"center");
+    let os=58,o=typo(item.opts[i]);while(tw(ctx,o,F(700,os))>580&&os>32)os-=2;
+    txt(ctx,o,220,top+68-os*.55,F(700,os),isC?"#000":(dim?"#5f5f5f":"#fff"));
+    if(isC)check(ctx,826,top+42,52,"#000");}
+  if(final)txt(ctx,"Rispondi nei commenti",487,1500,F(700,40),S.acc,"center");
 }
-function slideWelcome(ctx){background(ctx,S.acc);logo(ctx,62,56,96);let y=330;
-  for(const l of["SI PARTE","DALLA DOMANDA","DI IERI!"]){txt(ctx,l,540,y,F(800,112),"#fff","center");y+=118}y+=70;
-  for(const[h,b]of[["ERI QUI?","Scopri se avevi ragione."],["SEI NUOVO?","Prova a indovinare!"]]){rr(ctx,110,y,860,230,26);ctx.fillStyle="rgba(16,16,16,.94)";ctx.fill();ctx.strokeStyle=S.acc;ctx.lineWidth=4;ctx.stroke();
-    txt(ctx,h,540,y+40,F(800,76),S.acc,"center");txt(ctx,b,540,y+138,F(600,46,"Barlow"),"#fff","center");y+=280}
-  footer(ctx,0,true)}
-function slideClosing(ctx){background(ctx,S.acc);logo(ctx,62,56,96);const cols=rowColors();grid(ctx,297,300,70,12,6,cols);
-  ctx.strokeStyle="#fff";ctx.lineWidth=3;for(let i=0;i<6;i++){rr(ctx,297+i*82-6,300+5*82-6,82,82,16);ctx.stroke()}
-  let y=860;for(const l of["SCRIVI LA TUA","RISPOSTA NEI","COMMENTI"]){txt(ctx,l,540,y,F(800,104),"#fff","center");y+=112}y+=40;
-  for(const l of["La risposta arriva nel prossimo 6x6.","Seguici per non perderla."]){txt(ctx,l,540,y,F(600,44,"Barlow"),"#dcdcdc","center");y+=62}
-  const f=F(800,50),w=tw(ctx,"SEGUI LA PAGINA",f);rr(ctx,540-w/2-50,1590,w+100,90,45);ctx.fillStyle=S.acc;ctx.fill();txt(ctx,"SEGUI LA PAGINA",540,1608,f,"#000","center")}
-
+function slideWelcome(ctx){background(ctx,S.acc);let y=360;
+  for(const l of["SI PARTE","DALLA DOMANDA","DI IERI!"]){txt(ctx,l,540,y,F(800,108),"#fff","center");y+=114}y+=60;
+  for(const[h,b]of[["ERI QUI?","Scopri se avevi ragione."],["SEI NUOVO?","Prova a indovinare!"]]){rr(ctx,180,y,720,220,24);ctx.fillStyle="rgba(16,16,16,.94)";ctx.fill();ctx.strokeStyle=S.acc;ctx.lineWidth=4;ctx.stroke();
+    txt(ctx,h,540,y+38,F(800,72),S.acc,"center");txt(ctx,b,540,y+130,F(600,44,"Barlow"),"#fff","center");y+=262}
+  grid(ctx,540-87,y+30,24,6,0,rowColors())}
+function slideClosing(ctx){background(ctx,S.acc);const cols=rowColors();grid(ctx,353,330,64,10,6,cols);
+  ctx.strokeStyle="#fff";ctx.lineWidth=3;for(let i=0;i<6;i++){rr(ctx,353+i*74-5,330+5*74-5,74,74,14);ctx.stroke()}
+  let y=770;for(const l of["SCRIVI LA TUA","RISPOSTA NEI","COMMENTI"]){txt(ctx,l,540,y,F(800,100),"#fff","center");y+=106}y+=36;
+  for(const l of["La risposta arriva nel prossimo 6x6.","Seguici per non perderla."]){txt(ctx,l,540,y,F(600,42,"Barlow"),"#dcdcdc","center");y+=58}
+  const f=F(800,48),w=tw(ctx,"SEGUI LA PAGINA",f);rr(ctx,540-w/2-46,y+40,w+92,86,43);ctx.fillStyle=S.acc;ctx.fill();txt(ctx,"SEGUI LA PAGINA",540,y+57,f,"#000","center")}
 function fitBlock(ctx,text,weight,maxS,minS,maxW,maxH,col,lh){lh=lh||1.0;const segs=String(text).split("|").length;let s=maxS,lines,pass=0;for(;;s-=4){if(s<minS){if(pass)break;pass=1;s=maxS}lines=wrap(ctx,text,F(weight,s),maxW);if((pass||lines.length<=segs)&&lines.length*s*lh<=maxH)break}s=Math.max(s,minS)
   return{h:lines.length*s*lh,draw:(y)=>{for(const l of lines){txt(ctx,l,540,y,F(weight,s),col,"center");y+=s*lh}},w:Math.max(...lines.map(l=>tw(ctx,l,F(weight,s))))}}
 function bars(cols,width){return{h:44,draw:(y)=>{const c=cols.filter(hex);if(!c.length)return;const bw=Math.max(width*.8,240)/c.length,x0=540-bw*c.length/2;
   c.forEach((col,i)=>{CTX.fillStyle=col;CTX.fillRect(x0+i*bw,y+8,bw,16)})}}}
 let CTX;
-function slideCover(ctx,c){CTX=ctx;const glow=hex(c.bg)?c.bg:S.acc;background(ctx,glow);logo(ctx,540,64,250,true);
-  const ph=c.label?pillLines(ctx,540,360,c.label,S.acc,40):0;
-  const top=c.label?360+ph+40:380,bottom=1290;let B=[],tot=0;
+function slideCover(ctx,c){CTX=ctx;const glow=hex(c.bg)?c.bg:S.acc;background(ctx,glow);logo(ctx,540,300,200,true);
+  const ph=c.label?pillLines(ctx,540,520,c.label,S.acc,40):0;
+  const top=c.label?520+ph+36:540,bottom=1250;let B=[],tot=0;
   for(let K=1;K>=0.5;K-=0.08){B=[];const fitK=(x,t,w,mx,mn,mw,mh,col,lh)=>fitBlock(x,t,w,Math.round(mx*K/4)*4,Math.min(mn,Math.round(mx*K/4)*4),mw,mh*K,col,lh);
   const m=c.model,title=c.title||"",big=String(c.big??"").trim();
-  if(m==="Partita"){const vs=title.split(/\s+vs\.?\s+/i);const t=vs.length>1?[vs[0],vs.slice(1).join(" ")]:[title.split("|")[0],title.split("|").slice(1).join(" ")];const a=fitK(ctx,t[0]||"",800,210,80,920,300,"#fff");B.push(a);
+  if(m==="Partita"){const vs=title.split(/\s+vs\.?\s+/i);const t=vs.length>1?[vs[0],vs.slice(1).join(" ")]:[title.split("|")[0],title.split("|").slice(1).join(" ")];const a=fitK(ctx,t[0]||"",800,210,80,720,300,"#fff");B.push(a);
     if(c.c1)B.push(bars(c.c1.split(","),a.w));B.push({h:110,draw:y=>txt(ctx,"vs",540,y+6,F(800,90),S.acc,"center")});
-    const b=fitK(ctx,t[1]||"",800,210,80,920,300,"#fff");B.push(b);if(c.c2)B.push(bars(c.c2.split(","),b.w));}
-  else if(m==="Accadde oggi"){if(big)B.push(fitK(ctx,big,800,380,140,920,380,S.acc));B.push({h:20,draw:()=>{}});if(title)B.push(fitK(ctx,title,800,110,60,920,300,"#fff",1.05))}
-  else if(m==="Compleanno"){if(big){B.push(fitK(ctx,big,800,360,140,920,360,S.acc));B.push({h:80,draw:y=>txt(ctx,"ANNI",540,y,F(700,60),S.acc,"center")})}if(title)B.push(fitK(ctx,title,800,130,60,920,300,"#fff",1.05))}
-  else if(m==="Fantacalcio"){B.push({h:80,draw:y=>txt(ctx,"GIORNATA",540,y,F(700,60),S.acc,"center")});if(big)B.push(fitK(ctx,big,800,340,140,920,340,S.acc));if(title)B.push(fitK(ctx,title,800,110,60,920,280,"#fff",1.05))}
-  else{if(title)B.push(fitK(ctx,title,800,170,70,920,560,"#fff",1.02))}
-  if(c.sub){const f=F(600,48,"Barlow");const ls=wrap(ctx,c.sub,f,860);B.push({h:30+ls.length*66,draw:y=>{y+=30;for(const l of ls){txt(ctx,l,540,y,f,"#e1e1e1","center");y+=66}}})}
+    const b=fitK(ctx,t[1]||"",800,210,80,720,300,"#fff");B.push(b);if(c.c2)B.push(bars(c.c2.split(","),b.w));}
+  else if(m==="Accadde oggi"){if(big)B.push(fitK(ctx,big,800,380,140,720,380,S.acc));B.push({h:20,draw:()=>{}});if(title)B.push(fitK(ctx,title,800,110,60,720,300,"#fff",1.05))}
+  else if(m==="Compleanno"){if(big){B.push(fitK(ctx,big,800,360,140,720,360,S.acc));B.push({h:80,draw:y=>txt(ctx,"ANNI",540,y,F(700,60),S.acc,"center")})}if(title)B.push(fitK(ctx,title,800,130,60,720,300,"#fff",1.05))}
+  else if(m==="Fantacalcio"){B.push({h:80,draw:y=>txt(ctx,"GIORNATA",540,y,F(700,60),S.acc,"center")});if(big)B.push(fitK(ctx,big,800,340,140,720,340,S.acc));if(title)B.push(fitK(ctx,title,800,110,60,720,280,"#fff",1.05))}
+  else{if(title)B.push(fitK(ctx,title,800,170,70,720,560,"#fff",1.02))}
+  if(c.sub){const f=F(600,48,"Barlow");const ls=wrap(ctx,c.sub,f,720);B.push({h:30+ls.length*66,draw:y=>{y+=30;for(const l of ls){txt(ctx,l,540,y,f,"#e1e1e1","center");y+=66}}})}
   tot=B.reduce((a,b)=>a+b.h,0);if(tot<=bottom-top)break}
   let y=top+Math.max(0,(bottom-top-tot)/2);for(const b of B){b.draw(y);y+=b.h}
-  grid(ctx,540-160,1330,46,9,S.cov?6:0,rowColors());footer(ctx,0,false)}
+  grid(ctx,540-120,1280,35,7,S.cov?6:0,rowColors())}
 
 /* ---------- costruzione del post ---------- */
 const SLOT_LABEL=["","FACILE","MEDIA","MEDIA","DIFFICILE","DOMANDA FINALE"];
@@ -271,7 +273,7 @@ function drawPreview(){const key=$("day").value;if(!key)return;const post=buildP
   const fns=slidesOf(post),bad=post.warn.some(w=>w.includes("non trovata")||w.includes("Manca la domanda"));const gen=++GEN;FILES=null;
   $("share").disabled=true;$("pst").textContent=bad?"":"Preparo le immagini…";
   (async()=>{const files=[];for(let i=0;i<fns.length;i++){if(gen!==GEN)return;const big=render(fns[i]);
-    const sm=document.createElement("canvas");sm.width=270;sm.height=480;sm.getContext("2d").drawImage(big,0,0,270,480);
+    const sm=document.createElement("canvas");sm.width=270;sm.height=480;const sc=sm.getContext("2d");sc.drawImage(big,0,0,270,480);if($("sSafe").checked){sc.fillStyle="rgba(255,0,60,.35)";const k=270/1080;sc.fillRect(0,0,270,300*k);sc.fillRect(0,1540*k,270,480);sc.fillRect(900*k,300*k,270,1240*k)}
     const fn=fns[i];sm.onclick=()=>{const z=$("zoom");z.innerHTML="";z.appendChild(render(fn));z.style.display="flex"};pv.appendChild(sm);
     if(!bad)files.push(new File([await toBlob(big)],`6x6_${key}_${String(i+1).padStart(2,"0")}.png`,{type:"image/png"}));
     big.width=big.height=0;await new Promise(r=>setTimeout(r,0))}
@@ -306,7 +308,7 @@ $("bulk").onclick=async()=>{const a=$("from").value,b=$("to").value,zip=new JSZi
 /* ---------- impostazioni ---------- */
 function loadSet(){$("sAcc").value=S.acc;$("sF").value=S.f;$("sM").value=S.m;$("sD").value=S.d;$("sCov").checked=S.cov;$("sQ").value=S.qmax}
 function saveSet(){S.acc=$("sAcc").value;S.f=$("sF").value;S.m=$("sM").value;S.d=$("sD").value;S.cov=$("sCov").checked;S.qmax=Math.min(110,Math.max(56,+$("sQ").value||88));store.set("6x6set",JSON.stringify(S));if(PROG.length)loadDay()}
-["sAcc","sF","sM","sD","sCov","sQ"].forEach(id=>$(id).addEventListener("change",saveSet));
+$("sSafe").addEventListener("change",()=>PROG.length&&refresh());["sAcc","sF","sM","sD","sCov","sQ"].forEach(id=>$(id).addEventListener("change",saveSet));
 $("reset").onclick=()=>{S=Object.assign({},DEF);store.set("6x6set","{}");store.set("6x6logo","");LOGO.src=LOGO_DEFAULT;$("hlogo").src=LOGO_DEFAULT;loadSet();if(PROG.length)loadDay()};
 $("lf").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{LOGO.src=r.result;$("hlogo").src=r.result;store.set("6x6logo",r.result);LOGO.onload=()=>PROG.length&&loadDay()};r.readAsDataURL(f)};
 loadSet();$("url").value=store.get("6x6url")||"";
